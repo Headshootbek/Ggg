@@ -1,0 +1,73 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Line2D;
+
+public class LineIntersection extends JPanel {
+    private final Point p1, p2, p3, p4;
+    private Point intersectionPoint;
+
+    public LineIntersection(Point p1, Point p2, Point p3, Point p4) {
+        this.p1 = p1;
+        this.p2 = p2;
+        this.p3 = p3;
+        this.p4 = p4;
+        this.intersectionPoint = findIntersection(p1, p2, p3, p4);
+    }
+
+    private Point findIntersection(Point p1, Point p2, Point p3, Point p4) {
+        double denominator = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+        if (denominator == 0) {
+            return null; // Отрезки параллельны
+        }
+
+        double t = ((p1.x - p3.x) * (p3.y - p4.y) - (p1.y - p3.y) * (p3.x - p4.x)) / denominator;
+        double u = ((p1.x - p3.x) * (p1.y - p2.y) - (p1.y - p3.y) * (p1.x - p2.x)) / denominator;
+
+        if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+            int intersectionX = (int) (p1.x + t * (p2.x - p1.x));
+            int intersectionY = (int) (p1.y + t * (p2.y - p1.y));
+            return new Point(intersectionX, intersectionY);
+        }
+
+        return null;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+
+        // Рисуем отрезки
+        g2d.draw(new Line2D.Double(p1.x, p1.y, p2.x, p2.y));
+        g2d.draw(new Line2D.Double(p3.x, p3.y, p4.x, p4.y));
+
+        // Рисуем точку пересечения
+        if (intersectionPoint != null) {
+            g2d.setColor(Color.RED);
+            g2d.fillOval(intersectionPoint.x - 5, intersectionPoint.y - 5, 10, 10);
+            g2d.drawString("Intersection: (" + intersectionPoint.x + ", " + intersectionPoint.y + ")", intersectionPoint.x + 10, intersectionPoint.y);
+        }
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Line Intersection");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 400);
+
+        // Координаты отрезков
+        Point p1 = new Point(50, 50);
+        Point p2 = new Point(350, 350);
+        Point p3 = new Point(50, 350);
+        Point p4 = new Point(350, 50);
+
+        LineIntersection panel = new LineIntersection(p1, p2, p3, p4);
+        frame.add(panel);
+        frame.setVisible(true);
+
+        if (panel.intersectionPoint != null) {
+            System.out.println("Intersection point: (" + panel.intersectionPoint.x + ", " + panel.intersectionPoint.y + ")");
+        } else {
+            System.out.println("No intersection point found.");
+        }
+    }
+}
